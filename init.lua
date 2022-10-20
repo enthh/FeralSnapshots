@@ -21,68 +21,43 @@ local spell = { -- spellId by name
     clearcasting = 135700,
 
     rakeDot = 155722,
-    rakeStun = 163505,
-    rakeInitial = 1822,
+    rakeStealth = 163505,
+    --    rakeInitial = 1822,
     rip = 1079,
     thrash = 106830,
     moonfire = 155625,
-    primalWrath = 285381,
 }
 
-local tracking = {} -- set of spellIds
-for name, id in pairs(spell) do tracking[id] = name end
+-- expiration delays allow active tests to succeed for consumed auras in the
+-- same frame as removal but not for the next GCD
+local trackingDuration = 3600
+local consumedDelay = 0.010
+local gcdDelay = 0.250
+local consumed = {
+    [spell.prowl] = consumedDelay,
+    [spell.suddenAmbush] = consumedDelay,
+    [spell.shadowmeld] = consumedDelay,
+    [spell.clearcasting] = consumedDelay,
+    [spell.bloodtalons] = consumedDelay,
+}
 
-aura_env.talents = aura_env.talents or {} -- rank by spellId
-local talents = aura_env.talents
+local trackingSpell = {} -- set of spellIds to filter
+for name, id in pairs(spell) do
+    trackingSpell[id] = name
+end
 
 aura_env.auras = aura_env.auras or {} -- auras by GUID
 local auras = aura_env.auras
 
----
---- Damage Modifier Logic
----
+aura_env.talents = aura_env.talents or {} -- rank by spellId with damage modifiers
+local talents = aura_env.talents
 
-local function active(aura, time)
-    local res = false
+local function active(timestamp, aura) -- test same-frame aura activation
     if aura and aura.expirationTime then
-        res = aura.expirationTime == 0 or aura.expirationTime >= (time or GetTime())
+        return aura.expirationTime == 0 or aura.expirationTime > timestamp
     end
-    return res
+    return false
 end
-
-local function expire(unit, time) -- remove inactive auras
-    for id, aura in pairs(unit) do
-        if not active(aura, time) then
-            unit[id] = nil
-        end
-    end
-end
-
-local buffAdd = { -- modifiers to buffs at time t
-    tf = function(s,t) return talents:Rank(talent.carnivorousInstincts) * 0.06 end,
-}
-
-local buffed = { -- buff applicability at time t
-    tf      = function(s,t) return active(s[spell.tigersFury],t) end,
-    bt      = function(s,t) return active(s[spell.bloodtalons],t) and talents:Rank(talent.bloodtalons) > 0 end,
-    moc     = function(s,t) return active(s[spell.clearcasting],t) and talents:Rank(talent.momentOfClarity) > 0 end,
-    stealth = function(s,t) return active(s[spell.prowl],t) or active(s[spell.incarnProwl],t) or active(s[spell.shadowmeld],t) end,
-}
-
-local dmg = { -- damage modifier per buff at time t
-    tf      = function(s,t) return buffed.tf(s,t) and 1.15 + buffAdd.tf(s,t) or 1 end,
-    bt      = function(s,t) return buffed.bt(s,t) and 1.25 or 1 end,
-    moc     = function(s,t) return buffed.moc(s,t) and 1.15 or 1 end,
-    stealth = function(s,t) return buffed.stealth(s,t) and 1.60 or 1 end,
-}
-
-local debuffs = { -- damage modifier per debuff at time t
-    [spell.rakeStun] = function(s,t) return dmg.tf(s,t) * dmg.stealth(s,t) end,
-    [spell.rakeDot]  = function(s,t) return dmg.tf(s,t) * dmg.stealth(s,t) end,
-    [spell.rip]      = function(s,t) return dmg.tf(s,t) * dmg.bt(s,t) end,
-    [spell.thrash]   = function(s,t) return dmg.tf(s,t) * dmg.moc(s,t) end,
-    [spell.moonfire] = function(s,t) return dmg.tf(s,t) end,
-}
 
 --
 -- Talents
@@ -113,74 +88,132 @@ function talents:Load()
             end
         end
     end
+
+    self.damage = self:DamageModifiers()
+end
+
+function talents:DamageModifiers()
+    return {
+        tigersFury      = 1.15 + (self:Rank(talent.carnivorousInstincts) * 0.06),
+        bloodTalons     = self:Rank(talent.bloodtalons) > 0 and 1.25 or 1,
+        momentOfClarity = self:Rank(talent.momentOfClarity) > 0 and 1.15 or 1,
+        stealth         = 1.60,
+    }
 end
 
 --
--- Unit/Spell Tracking
+-- Unit/Spell/Arua/Snapshot Tracking
 --
 
-local function snapshot(unit) -- copy unit aura refs
-    local buffs = {}
-    for k, v in pairs(unit) do buffs[k] = v end
-    return buffs
+function auras:snapshot(t, spellId) -- snapshot state by spell from damage modifier logic
+    local dmg = {
+        tigersFury = 1,
+        stealth = 1,
+        bloodtalons = 1,
+        momentOfClarity = 1,
+        snapshot = 1,
+    }
+
+    local player = self.units[playerGUID]
+    local tf = (active(t, player[spell.tigersFury]) and talents.damage.tigersFury or dmg.tigersFury)
+
+    if (spell.rakeDot == spellId or spell.rakeStealth == spellId) then
+        if active(t, player[spell.suddenAmbush])
+            or active(t, player[spell.prowl])
+            or active(t, player[spell.incarnProwl])
+            or active(t, player[spell.shadowmeld]) then
+            dmg.stealth = talents.damage.stealth
+        end
+        dmg.tigersFury = tf
+        dmg.snapshot   = dmg.tigersFury * dmg.stealth
+
+    elseif spell.rip == spellId then
+        if active(t, player[spell.bloodtalons]) then
+            dmg.bloodtalons = talents.damage.bloodtalons
+        end
+        dmg.tigersFury = tf
+        dmg.snapshot = dmg.tigersFury * dmg.bloodtalons
+
+    elseif spell.thrash == spellId then
+        if active(t, player[spell.clearcasting]) then
+            dmg.momentOfClarity = talents.damage.momentOfClarity
+        end
+        dmg.tigersFury = tf
+        dmg.snapshot = dmg.tigersFury * dmg.momentOfClarity
+
+    elseif spell.moonfire == spellId then
+        dmg.tigersFury = tf
+        dmg.snapshot = dmg.tigersFury
+    end
+
+    return dmg
 end
 
 function auras:Load()
     self.units = setmetatable(self.units or {}, {
         __index = function(t, guid) t[guid] = {}; return t[guid] end,
     })
+
+    -- apply existing player buffs
+    local GetPlayerAuraBySpellID = GetPlayerAuraBySpellID
+    for _, spellId in pairs(spell) do
+        local info = GetPlayerAuraBySpellID(spellId)
+        if info then
+            local expirationTime, castByPlayer = select(6, info), select(12, info)
+            if castByPlayer then
+                self:Apply(playerGUID, spellId, expirationTime)
+            end
+        end
+    end
     -- TODO refresh player buffs
 end
 
 function auras:Track(sourceGUID, spellId)
-    return sourceGUID == playerGUID and tracking[spellId]
+    return sourceGUID == playerGUID and trackingSpell[spellId]
 end
 
-function auras:Apply(guid, spellId)
-    self.units[guid][spellId] = {
-        spellId = spellId,
-        expirationTime = GetTime() + 600,
-        snapshot = debuffs[spellId] and snapshot(self.units[playerGUID]),
+function auras:Apply(ts, guid, spellId)
+    local aura = {
+        expirationTime = ts + trackingDuration,
     }
 
-    return true
-end
-
-function auras:Remove(guid, spellId)
-    local now = GetTime()
-    local unit = self.units[guid]
-
-    local aura = unit[spellId]
-    if not aura then -- expired or never applied
-        return
+    if guid ~= playerGUID then
+        aura.snapshot = self:snapshot(ts, spellId)
     end
 
-    unit[spellId] = { -- new ref with original aura snapshot aura refs
-        spellId = spellId,
-        expirationTime = now,
-        snapshot = aura.snapshot,
-    }
+    self.units[guid][spellId] = aura
+end
 
-    if guid ~= playerGUID then -- free units without debuffs
-        expire(unit, now)
-        if not next(unit) then
-            self.units[guid] = nil
+function auras:Remove(timestamp, guid, spellId)
+    local aura = self.units[guid][spellId]
+    if aura then
+        aura.expirationTime = timestamp + (consumed[spellId] or 0)
+    end
+
+    self:GarbageCollect(timestamp, guid)
+end
+
+function auras:GarbageCollect(timestamp, guid)
+    local unit = self.units[guid]
+    for id, aura in pairs(unit) do
+        if not active(timestamp, aura) then
+            unit[id] = nil
         end
     end
+
+    if not next(unit) then -- zero auras
+        self.units[guid] = nil
+    end
 end
 
---- WA integration
+--- WA/TSU integration
 
-function auras:TriggerStateUpdate(states)
-    -- TODO use trigger number from custom OPTIONS
+function auras:TriggerStateUpdate(ts, states)
+    -- TODO OPTION for trigger number states
     local others = WeakAuras.GetTriggerStateForTrigger(aura_env.id, 1)
 
-    local currentSnapshot = snapshot(self.units[playerGUID])
-    expire(currentSnapshot, GetTime() - 0.250) -- next GCD snapshot
-
     for cloneId, clone in pairs(others) do
-        local aura = self.units[clone.GUID][clone.spellId]
-        local modifier = debuffs[clone.spellId]
+        local current = self:snapshot(ts + gcdDelay, clone.spellId)
 
         local state = {
             show = clone.show,
@@ -191,20 +224,38 @@ function auras:TriggerStateUpdate(states)
             active = clone.active,
             name = clone.name,
 
+            currentDamage = current.snapshot,
+            reapplyDamage = 1,
+            reapplyDamagePercent = 100,
         }
 
-        if aura and modifier then
-            state.hadTigersFury = buffed.tf(aura.snapshot, clone.refreshTime)
-            state.hadStealth = buffed.stealth(aura.snapshot, clone.refreshTime)
-            state.hadBloodtalons = buffed.bt(aura.snapshot, clone.refreshTime)
-            state.hadMomentOfClarity = buffed.moc(aura.snapshot, clone.refreshTime)
+        local aura = self.units[clone.GUID][clone.spellId]
+        if aura and aura.snapshot then
+            local dmg = aura.snapshot
 
-            state.snapshotDamage = modifier(aura.snapshot, clone.refreshTime)
-            state.currentDamage = modifier(currentSnapshot, GetTime() + 0.250)
+            -- project damage modifiers to WA condition/text fields
+            state.tigersFuryDamage = dmg.tigersFury
+            state.hadTigersFury = dmg.tigersFury > 1
+            state.hasTigersFury = current.tigersFury > 1
+
+            state.stealthDamage = dmg.stealth
+            state.hadStealth = dmg.stealth > 1
+            state.hasStealth = current.stealth > 1
+
+            state.bloodtalonsDamage = dmg.bloodtalons
+            state.hadBloodtalons = dmg.bloodtalons > 1
+            state.hasBloodtalons = current.bloodtalons > 1
+
+            state.momentOfClarityDamage = dmg.momentOfClarity
+            state.hadMomentOfClarity = dmg.momentOfClarity > 1
+            state.hasMomentOfClarity = current.momentOfClarity > 1
+
+            state.snapshotDamage = dmg.snapshot
             state.reapplyDamage = state.currentDamage / state.snapshotDamage
             state.reapplyDamagePercent = math.floor(state.reapplyDamage * 100 + 0.5)
-            print("st", GetTime(), clone.initialTime, "snap", buffed.stealth(aura.snapshot), aura.snapshot[spell.prowl].expirationTime, "current", buffed.stealth(currentSnapshot))
         end
+
+        -- TODO OPTION to emulate feralSnapshots or xan_feralsnapshots
 
         states[cloneId] = state
     end
@@ -226,30 +277,38 @@ aura_env.COMBAT_LOG_EVENT_UNFILTERED = function(states, ...)
     return dispatch(states, ...)
 end
 
-aura_env.SPELL_AURA_APPLIED = function(states, _, _, _, _, sourceGUID, _, _, _, destGUID, _, _, _, spellId)
+aura_env.SPELL_AURA_APPLIED = function(states, _, timestamp, msg, _, sourceGUID, _, _, _, destGUID, _, _, _, spellId)
     if auras:Track(sourceGUID, spellId) then
-        print("SAA >", destGUID, spellId)
-        auras:Apply(destGUID, spellId)
-        print("SAA <", destGUID, active(auras.units[destGUID][spellId]))
-        auras:TriggerStateUpdate(states)
+        DebugPrint(msg, ">", destGUID, spellId)
+
+        auras:Apply(timestamp, destGUID, spellId)
+        DebugPrint(msg, "<", destGUID, active(timestamp, auras.units[destGUID][spellId]))
+
+        auras:TriggerStateUpdate(timestamp, states)
+        DebugPrint(msg, "=", states)
+
         return true
     end
 end
 
-aura_env.SPELL_AURA_REFRESHED = aura_env.SPELL_AURA_APPLIED
+aura_env.SPELL_AURA_REFRESH = aura_env.SPELL_AURA_APPLIED
 
-aura_env.SPELL_AURA_REMOVED = function(states, _, _, _, _, sourceGUID, _, _, _, destGUID, _, _, _, spellId)
+aura_env.SPELL_AURA_REMOVED = function(states, _, timestamp, msg, _, sourceGUID, _, _, _, destGUID, _, _, _, spellId)
     if auras:Track(sourceGUID, spellId) then
-        print("SAR >", destGUID, spellId)
-        auras:Remove(destGUID, spellId)
-        print("SAR <", destGUID, active(auras.units[destGUID][spellId]))
-        auras:TriggerStateUpdate(states)
+        DebugPrint(msg, ">", destGUID, spellId)
+
+        auras:Remove(timestamp, destGUID, spellId)
+        DebugPrint(msg, "<", destGUID, active(timestamp, auras.units[destGUID][spellId]))
+
+        auras:TriggerStateUpdate(timestamp, states)
+        DebugPrint(msg, "=", states)
+
         return true
     end
 end
 
 aura_env.TRIGGER = function(states)
-    auras:TriggerStateUpdate(states)
+    auras:TriggerStateUpdate(GetTime(), states)
     return true
 end
 
@@ -259,6 +318,5 @@ end
 talents:Load()
 auras:Load()
 
-UIParentLoadAddOn("Blizzard_DebugTools")
---DisplayTableInspectorWindow(auras)
---DisplayTableInspectorWindow(aura_env.talents)
+-- UIParentLoadAddOn("Blizzard_DebugTools")
+-- DisplayTableInspectorWindow(aura_env)
