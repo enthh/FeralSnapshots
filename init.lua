@@ -229,10 +229,10 @@ function auras:TriggerStateUpdate(ts, states)
             hasBloodtalons = current.bloodtalons > 1,
             hasMomentOfClarity = current.momentOfClarity > 1,
 
-            currentDamage = current.snapshot,
+            current = current.snapshot,
 
-            reapplyDamage = 1,
-            reapplyDamagePercent = 100,
+            overwrite = 1,
+            overwritePercent = 100,
         }
 
         local aura = self.units[clone.GUID][clone.spellId]
@@ -242,22 +242,22 @@ function auras:TriggerStateUpdate(ts, states)
             state.active = true
 
             -- project damage modifiers to WA condition/text fields
-            state.tigersFuryDamage = dmg.tigersFury
+            state.tigersFury = dmg.tigersFury
             state.hadTigersFury = dmg.tigersFury > 1
 
-            state.stealthDamage = dmg.stealth
+            state.stealth = dmg.stealth
             state.hadStealth = dmg.stealth > 1
 
-            state.bloodtalonsDamage = dmg.bloodtalons
+            state.bloodtalons = dmg.bloodtalons
             state.hadBloodtalons = dmg.bloodtalons > 1
 
-            state.momentOfClarityDamage = dmg.momentOfClarity
+            state.momentOfClarity = dmg.momentOfClarity
             state.hadMomentOfClarity = dmg.momentOfClarity > 1
 
-            state.snapshotDamage = dmg.snapshot
+            state.snapshot = dmg.snapshot
 
-            state.reapplyDamage = state.currentDamage / state.snapshotDamage
-            state.reapplyDamagePercent = math.floor(state.reapplyDamage * 100 + 0.5)
+            state.overwrite = state.current / state.snapshot
+            state.overwritePercent = math.floor(state.overwrite * 100 + 0.5)
         end
 
         -- TODO OPTION to emulate feralSnapshots or xan_feralsnapshots
