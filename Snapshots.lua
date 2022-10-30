@@ -1,0 +1,238 @@
+local _, Private = ...
+
+local -- from global
+GetTime, UnitGUID, CombatLogGetCurrentEventInfo, C_UnitAuras, C_ClassTalents, C_Traits =
+GetTime, UnitGUID, CombatLogGetCurrentEventInfo, C_UnitAuras, C_ClassTalents, C_Traits
+
+local buff = { -- spellId by name
+    tigersFury = 5217,
+
+    bloodtalons = 145152,
+
+    prowl = 5215,
+    incarnProwl = 102547,
+    shadowmeld = 58984,
+    suddenAmbush = 391974,
+    berserk = 106951,
+    incarnation = 102543,
+
+    clearcasting = 135700,
+}
+
+local debuff = { -- spellId by name
+    rake = 155722,
+    rip = 1079,
+    thrash = 106830,
+    moonfire = 155625,
+}
+
+local talent = { -- passive spellId by name
+    berserk = 106951,
+    bloodtalons = 319439,
+    incarnation = 102543,
+    momentOfClarity = 236068,
+    carnivorousInstinct = 390902,
+}
+
+local buffId = tInvert(buff)
+
+local debuffId = tInvert(debuff)
+
+Private.debuff = debuff
+
+function Private:loadTraits()
+    self.talents = {}
+    local configId = C_ClassTalents.GetActiveConfigID()
+    if configId then
+        local config = C_Traits.GetConfigInfo(configId)
+        for _, treeId in ipairs(config.treeIDs) do
+            local nodeIds = C_Traits.GetTreeNodes(treeId)
+            for _, nodeId in ipairs(nodeIds) do
+                local node = C_Traits.GetNodeInfo(configId, nodeId)
+                if node and node.ID ~= 0 then
+                    for _, entryId in ipairs(node.entryIDs) do
+                        local entry = C_Traits.GetEntryInfo(configId, entryId)
+                        local definition = C_Traits.GetDefinitionInfo(entry.definitionID)
+                        if node.activeEntry then
+                            self.talents[definition.spellID] = node.currentRank
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- merge conduits
+    local carnivourousInstinct = 340705 -- usable in SL
+    if IsPlayerSpell(carnivourousInstinct) and IsUsableSpell(carnivourousInstinct) then
+        self.talents[talent.carnivorousInstinct] = max(1, self.talents[talent.carnivorousInstinct] or 0)
+    end
+    -- end conduits
+end
+
+function Private:rank(talentSpellId)
+    return self.talents[talentSpellId] or 0
+end
+
+function Private:damageModifiers()
+    return {
+        tigersFury      = 1.15 + (self:rank(talent.carnivorousInstinct) * 0.06),
+        bloodtalons     = 1.25,
+        momentOfClarity = self:rank(talent.momentOfClarity) > 0 and 1.15 or 1,
+        stealth         = 1.60,
+    }
+end
+
+local function snapshot(debuffId, has, aura, modifiers) -- snapshot state by spell and damage modifier logic
+    local damage = {
+        tigersFury = ((has(aura[buff.tigersFury]) and modifiers.tigersFury) or 1),
+        bloodtalons = 1,
+        momentOfClarity = 1,
+        stealth = 1,
+        total = 1,
+    }
+
+    if debuff.rake == debuffId then
+        if has(aura[buff.suddenAmbush])
+            or has(aura[buff.berserk])
+            or has(aura[buff.incarnation])
+            or has(aura[buff.incarnProwl])
+            or has(aura[buff.prowl])
+            or has(aura[buff.shadowmeld])
+        then
+            damage.stealth = modifiers.stealth
+        end
+        damage.total = damage.tigersFury * damage.stealth
+
+    elseif debuff.rip == debuffId then
+        if has(aura[buff.bloodtalons]) then
+            damage.bloodtalons = modifiers.bloodtalons
+        end
+        damage.total = damage.tigersFury * damage.bloodtalons
+
+    elseif debuff.thrash == debuffId then
+        if has(aura[buff.clearcasting]) then
+            damage.momentOfClarity = modifiers.momentOfClarity
+        end
+        damage.total = damage.tigersFury * damage.momentOfClarity
+
+    elseif debuff.moonfire == debuffId then
+        damage.total = damage.tigersFury
+
+    else
+        assert(nil, "Snapshot requested for unknown debuff")
+
+    end
+
+    return damage
+end
+
+local function activeThisFrame(expirationTime) -- test same-frame aura activation
+    return expirationTime and (expirationTime == 0 or expirationTime >= GetTime())
+end
+
+local function activeNextFrame(expirationTime) -- test next-frame/GCD aura activation
+    return expirationTime and (expirationTime == 0 or expirationTime > GetTime())
+end
+
+function Private:load()
+    self.snapshots = self.snapshots or {}
+
+    self:loadTraits()
+    self.damage = self:damageModifiers()
+
+    self.buffs = {}
+    for _, spellId in pairs(buff) do
+        self:refreshBuff(spellId)
+    end
+
+    self.next = {}
+    self:updateNextSnapshots()
+end
+
+function Private:updateNextSnapshots()
+    for _, spellId in pairs(debuff) do
+        self.next[spellId] = snapshot(spellId, activeNextFrame, self.buffs, self.damage)
+    end
+end
+
+function Private:refreshBuff(spellId)
+    local aura = C_UnitAuras.GetPlayerAuraBySpellID(spellId)
+    if aura then
+        self.buffs[spellId] = aura.expirationTime
+    end
+end
+
+function Private:removeBuff(spellId)
+    print("remove", spellId, GetTime())
+    self.buffs[spellId] = GetTime()
+end
+
+function Private:removeSnapshot(destGUID, spellId)
+    local unit = self.snapshots[destGUID]
+    if unit then
+        unit[spellId] = nil
+        if not next(unit) then
+            self.snapshots[destGUID] = nil
+        end
+    end
+end
+
+function Private:refreshSnapshot(destGUID, spellId)
+    local unit = self.snapshots[destGUID]
+    if not unit then
+        unit = {}
+        self.snapshots[destGUID] = unit
+    end
+    unit[spellId] = snapshot(spellId, activeThisFrame, self.buffs, self.damage)
+end
+
+--
+-- Events
+--
+
+local events = {}
+
+local playerGUID = UnitGUID("player")
+
+function events:COMBAT_LOG_EVENT_UNFILTERED()
+    local _, msg, _, sourceGUID, _, _, _, destGUID, _, _, _, spellId = CombatLogGetCurrentEventInfo()
+
+    if sourceGUID == playerGUID then
+        if msg == "SPELL_AURA_REFRESHED" or msg == "SPELL_AURA_APPLIED" then
+            if buffId[spellId] then
+                self:refreshBuff(spellId)
+                self:updateNextSnapshots()
+            elseif debuffId[spellId] then
+                self:refreshSnapshot(destGUID, spellId)
+            end
+        elseif msg == "SPELL_AURA_REMOVED" then
+            if buffId[spellId] then
+                self:removeBuff(spellId)
+                self:updateNextSnapshots()
+            elseif debuffId[spellId] then
+                self:removeSnapshot(destGUID, spellId)
+            end
+        end
+    end
+end
+
+events.PLAYER_ENTERING_WORLD = Private.load
+events.PLAYER_TALENT_UPDATE = Private.load
+events.ACTIVE_TALENT_GROUP_CHANGED = Private.load
+events.PLAYER_PVP_TALENT_UPDATE = Private.load
+events.TRAIT_CONFIG_CREATED = Private.load
+events.TRAIT_CONFIG_UPDATED = Private.load
+
+local f = CreateFrame("Frame")
+
+f:SetScript("OnEvent", function(self, event, ...)
+    events[event](Private, ...)
+end)
+
+for k, _ in pairs(events) do
+    f:RegisterEvent(k)
+end
+
+-- UIParentLoadAddOn("Blizzard_DebugTools")
+-- DisplayTableInspectorWindow(Private)

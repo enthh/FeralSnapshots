@@ -1,0 +1,7 @@
+## Interface: 100001
+## Title: Feral Snapshots
+## Notes: Snapshot tracking for GUID + Spell
+## Author: Enth-Emerald Dream
+
+Snapshots.lua
+FeralSnapshots.lua
