@@ -18,7 +18,7 @@ FeralSnapshots tracks the talents, buffs and damage modifiers applied for Rake, 
 
 ### Example WeakAuras
 
-Rake relative refresh percentage text aura. [https://wago.io/kv9PKbD7i](https://wago.io/kv9PKbD7i)
+Rake relative refresh percentage text aura. [https://wago.io/Qy4t8or16](https://wago.io/Qy4t8or16)
 
 ## Usage
 
