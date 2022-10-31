@@ -1,7 +1,10 @@
 ## Interface: 100001
-## Title: Feral Snapshots
-## Notes: Global snapshot tracking for applied, refreshable and next DoTs. Usable by WeakAuras, Plater and other addons.
+## Title: FeralSnapshots
+## Notes: Feral Druid bleed and DoT snapshot tracking for applied, refreshable and new auras. Usable by WeakAuras, Plater and other addons.
 ## Author: Enth-Emerald Dream
+## Version: @project-version@
+## X-Website: https://www.curseforge.com/wow/addons/feralsnapshots
+## X-Curse-Project-ID: 695549
 
 Snapshots.lua
 FeralSnapshots.lua
