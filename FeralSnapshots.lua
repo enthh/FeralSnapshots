@@ -4,7 +4,7 @@ local debuff = Private.debuff
 
 FeralSnapshots = {}
 
-function FeralSnapshots:AppliedDebuff(GUID, spellId)
+function FeralSnapshots.Current(GUID, spellId)
     local unit = Private.snapshots[GUID]
     if not unit then
         return nil
@@ -13,45 +13,45 @@ function FeralSnapshots:AppliedDebuff(GUID, spellId)
     return unit[spellId]
 end
 
-function FeralSnapshots:AppliedRake(GUID)
-    return self:AppliedDebuff(GUID, debuff.rake)
+function FeralSnapshots.CurrentRake(GUID)
+    return FeralSnapshots.Current(GUID, debuff.rake)
 end
 
-function FeralSnapshots:AppliedRip(GUID)
-    return self:AppliedDebuff(GUID, debuff.rip)
+function FeralSnapshots.CurrentRip(GUID)
+    return FeralSnapshots.Current(GUID, debuff.rip)
 end
 
-function FeralSnapshots:AppliedThrash(GUID)
-    return self:AppliedDebuff(GUID, debuff.thrash)
+function FeralSnapshots.CurrentThrash(GUID)
+    return FeralSnapshots.Current(GUID, debuff.thrash)
 end
 
-function FeralSnapshots:AppliedMoonfire(GUID)
-    return self:AppliedDebuff(GUID, debuff.moonfire)
+function FeralSnapshots.CurrentMoonfire(GUID)
+    return FeralSnapshots.Current(GUID, debuff.moonfire)
 end
 
-function FeralSnapshots:NextDebuff(spellId)
+function FeralSnapshots.Next(spellId)
     return Private.next[spellId]
 end
 
-function FeralSnapshots:NextRake()
-    return self:NextDebuff(debuff.rake)
+function FeralSnapshots.NextRake()
+    return FeralSnapshots.Next(debuff.rake)
 end
 
-function FeralSnapshots:NextRip()
-    return self:NextDebuff(debuff.rip)
+function FeralSnapshots.NextRip()
+    return FeralSnapshots.Next(debuff.rip)
 end
 
-function FeralSnapshots:NextThrash()
-    return self:NextDebuff(debuff.thrash)
+function FeralSnapshots.NextThrash()
+    return FeralSnapshots.Next(debuff.thrash)
 end
 
-function FeralSnapshots:NextMoonfire()
-    return self:NextDebuff(debuff.moonfire)
+function FeralSnapshots.NextMoonfire()
+    return FeralSnapshots.Next(debuff.moonfire)
 end
 
-function FeralSnapshots:RefreshDebuff(GUID, spellId)
-    local refresh = self:NextDebuff(spellId)
-    local applied = self:AppliedDebuff(GUID, spellId)
+function FeralSnapshots.Relative(GUID, spellId)
+    local refresh = FeralSnapshots.Next(spellId)
+    local applied = FeralSnapshots.Current(GUID, spellId)
     if not applied then
         return refresh
     end
@@ -69,20 +69,20 @@ function FeralSnapshots:RefreshDebuff(GUID, spellId)
     return diff
 end
 
-function FeralSnapshots:RefreshRake(GUID)
-    return self:RefreshDebuff(GUID, debuff.rake)
+function FeralSnapshots.RelativeRake(GUID)
+    return FeralSnapshots.Relative(GUID, debuff.rake)
 end
 
-function FeralSnapshots:RefreshRip(GUID)
-    return self:RefreshDebuff(GUID, debuff.rip)
+function FeralSnapshots.RelativeRip(GUID)
+    return FeralSnapshots.Relative(GUID, debuff.rip)
 end
 
-function FeralSnapshots:RefreshThrash(GUID)
-    return self:RefreshDebuff(GUID, debuff.thrash)
+function FeralSnapshots.RelativeThrash(GUID)
+    return FeralSnapshots.Relative(GUID, debuff.thrash)
 end
 
-function FeralSnapshots:RefreshMoonfire(GUID)
-    return self:RefreshDebuff(GUID, debuff.moonfire)
+function FeralSnapshots.RelativeMoonfire(GUID)
+    return FeralSnapshots.Relative(GUID, debuff.moonfire)
 end
 
 -- FeralSnapshots.private = Private
