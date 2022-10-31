@@ -85,4 +85,8 @@ function FeralSnapshots.RelativeMoonfire(GUID)
     return FeralSnapshots.Relative(GUID, debuff.moonfire)
 end
 
--- FeralSnapshots.private = Private
+function FeralSnapshots.debug()
+    UIParentLoadAddOn("Blizzard_DebugTools")
+    DisplayTableInspectorWindow(Private)
+    return Private
+end
