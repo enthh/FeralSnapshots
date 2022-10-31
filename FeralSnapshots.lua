@@ -50,8 +50,8 @@ function FeralSnapshots:NextMoonfire()
 end
 
 function FeralSnapshots:RefreshDebuff(GUID, spellId)
-    local refresh = self.NextDebuff(spellId)
-    local applied = self.AppliedDebuff(spellId)
+    local refresh = self:NextDebuff(spellId)
+    local applied = self:AppliedDebuff(GUID, spellId)
     if not applied then
         return refresh
     end
@@ -61,6 +61,8 @@ function FeralSnapshots:RefreshDebuff(GUID, spellId)
         local current = applied[k]
         if current then
             diff[k] = later / current
+        else
+            diff[k] = later
         end
     end
 

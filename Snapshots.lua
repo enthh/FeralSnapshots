@@ -42,6 +42,8 @@ Private.debuff = debuff
 
 function Private:loadTraits()
     self.talents = {}
+    
+    -- traits
     local configId = C_ClassTalents.GetActiveConfigID()
     if configId then
         local config = C_Traits.GetConfigInfo(configId)
@@ -62,12 +64,12 @@ function Private:loadTraits()
         end
     end
 
-    -- merge conduits
+    -- conduits don't stack
     local carnivourousInstinct = 340705 -- usable in SL
     if IsPlayerSpell(carnivourousInstinct) and IsUsableSpell(carnivourousInstinct) then
-        self.talents[talent.carnivorousInstinct] = max(1, self.talents[talent.carnivorousInstinct] or 0)
+        local talentedRank = self.talents[talent.carnivorousInstinct] or 0
+        self.talents[talent.carnivorousInstinct] = max(1, talentedRank)
     end
-    -- end conduits
 end
 
 function Private:rank(talentSpellId)
@@ -77,13 +79,13 @@ end
 function Private:damageModifiers()
     return {
         tigersFury      = 1.15 + (self:rank(talent.carnivorousInstinct) * 0.06),
-        bloodtalons     = 1.25,
+        bloodtalons     = self:rank(talent.bloodtalons) > 0 and 1.25 or 1,
         momentOfClarity = self:rank(talent.momentOfClarity) > 0 and 1.15 or 1,
         stealth         = 1.60,
     }
 end
 
-local function snapshot(debuffId, has, aura, modifiers) -- snapshot state by spell and damage modifier logic
+local function snapshot(spellId, has, aura, modifiers) -- snapshot state by spell and damage modifier logic
     local damage = {
         tigersFury = ((has(aura[buff.tigersFury]) and modifiers.tigersFury) or 1),
         bloodtalons = 1,
@@ -92,7 +94,7 @@ local function snapshot(debuffId, has, aura, modifiers) -- snapshot state by spe
         total = 1,
     }
 
-    if debuff.rake == debuffId then
+    if debuff.rake == spellId then
         if has(aura[buff.suddenAmbush])
             or has(aura[buff.berserk])
             or has(aura[buff.incarnation])
@@ -104,19 +106,19 @@ local function snapshot(debuffId, has, aura, modifiers) -- snapshot state by spe
         end
         damage.total = damage.tigersFury * damage.stealth
 
-    elseif debuff.rip == debuffId then
+    elseif debuff.rip == spellId then
         if has(aura[buff.bloodtalons]) then
             damage.bloodtalons = modifiers.bloodtalons
         end
         damage.total = damage.tigersFury * damage.bloodtalons
 
-    elseif debuff.thrash == debuffId then
+    elseif debuff.thrash == spellId then
         if has(aura[buff.clearcasting]) then
             damage.momentOfClarity = modifiers.momentOfClarity
         end
         damage.total = damage.tigersFury * damage.momentOfClarity
 
-    elseif debuff.moonfire == debuffId then
+    elseif debuff.moonfire == spellId then
         damage.total = damage.tigersFury
 
     else
@@ -124,6 +126,9 @@ local function snapshot(debuffId, has, aura, modifiers) -- snapshot state by spe
 
     end
 
+    --print("--snapshot", spellId, GetTime())
+    --DevTools_Dump(aura)
+    --DevTools_Dump(damage)
     return damage
 end
 
@@ -164,7 +169,6 @@ function Private:refreshBuff(spellId)
 end
 
 function Private:removeBuff(spellId)
-    print("remove", spellId, GetTime())
     self.buffs[spellId] = GetTime()
 end
 
@@ -199,7 +203,7 @@ function events:COMBAT_LOG_EVENT_UNFILTERED()
     local _, msg, _, sourceGUID, _, _, _, destGUID, _, _, _, spellId = CombatLogGetCurrentEventInfo()
 
     if sourceGUID == playerGUID then
-        if msg == "SPELL_AURA_REFRESHED" or msg == "SPELL_AURA_APPLIED" then
+        if msg == "SPELL_AURA_REFRESH" or msg == "SPELL_AURA_APPLIED" then
             if buffId[spellId] then
                 self:refreshBuff(spellId)
                 self:updateNextSnapshots()
@@ -234,5 +238,4 @@ for k, _ in pairs(events) do
     f:RegisterEvent(k)
 end
 
--- UIParentLoadAddOn("Blizzard_DebugTools")
--- DisplayTableInspectorWindow(Private)
+-- UIParentLoadAddOn("Blizzard_DebugTools"); DisplayTableInspectorWindow(Private)

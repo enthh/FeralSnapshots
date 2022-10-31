@@ -1,6 +1,6 @@
 ## Interface: 100001
 ## Title: Feral Snapshots
-## Notes: Snapshot tracking for GUID + Spell
+## Notes: Global snapshot tracking for applied, refreshable and next DoTs. Usable by WeakAuras, Plater and other addons.
 ## Author: Enth-Emerald Dream
 
 Snapshots.lua
