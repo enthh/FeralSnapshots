@@ -4,7 +4,7 @@ FeralSnapshots tracks the talents, buffs and damage modifiers applied for Rake, 
 
 <div align="center">
 
-![logo](https.//raw.githubusercontent.com/enthh/FeralSnapshots/main/icon.jpg "FeralSnapshots Logo")
+![logo](https://raw.githubusercontent.com/enthh/FeralSnapshots/main/icon.jpg "FeralSnapshots Logo")
 
 </div>
 
