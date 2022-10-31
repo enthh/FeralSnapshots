@@ -42,21 +42,23 @@ Private.debuff = debuff
 
 function Private:loadTraits()
     self.talents = {}
-    
+
     -- traits
     local configId = C_ClassTalents.GetActiveConfigID()
     if configId then
         local config = C_Traits.GetConfigInfo(configId)
-        for _, treeId in ipairs(config.treeIDs) do
-            local nodeIds = C_Traits.GetTreeNodes(treeId)
-            for _, nodeId in ipairs(nodeIds) do
-                local node = C_Traits.GetNodeInfo(configId, nodeId)
-                if node and node.ID ~= 0 then
-                    for _, entryId in ipairs(node.entryIDs) do
-                        local entry = C_Traits.GetEntryInfo(configId, entryId)
-                        local definition = C_Traits.GetDefinitionInfo(entry.definitionID)
-                        if node.activeEntry then
-                            self.talents[definition.spellID] = node.currentRank
+        if config then
+            for _, treeId in ipairs(config.treeIDs) do
+                local nodeIds = C_Traits.GetTreeNodes(treeId)
+                for _, nodeId in ipairs(nodeIds) do
+                    local node = C_Traits.GetNodeInfo(configId, nodeId)
+                    if node and node.ID ~= 0 then
+                        for _, entryId in ipairs(node.entryIDs) do
+                            local entry = C_Traits.GetEntryInfo(configId, entryId)
+                            local definition = C_Traits.GetDefinitionInfo(entry.definitionID)
+                            if node.activeEntry then
+                                self.talents[definition.spellID] = node.currentRank
+                            end
                         end
                     end
                 end
