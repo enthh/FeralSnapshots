@@ -18,7 +18,8 @@ FeralSnapshots tracks the talents, buffs and damage modifiers applied for Rake, 
 
 ### Example WeakAuras
 
-Rake relative refresh percentage text aura. [https://wago.io/Qy4t8or16](https://wago.io/Qy4t8or16)
+* Simple rake percentage text aura: [https://wago.io/Qy4t8or16](https://wago.io/Qy4t8or16)
+* Full pack of DoTs attached to the Personal Resource Display: [https://wago.io/MvvDUl_o9](https://wago.io/MvvDUl_o9)
 
 ## Usage
 
@@ -100,9 +101,7 @@ Spell IDs cast in Cat Form that snapshot:
 }
 ```
 
-Find a unit's GUID with the function [`UnitGUID(unitId)`](https://wowpedia.fandom.com/wiki/API_UnitGUID) like `UnitGUID("nameplate9")`.
-
-### Usage - WeakAuras
+## Usage - WeakAuras
 
 ![ExamplePack](https://github.com/enthh/FeralSnapshots/raw/main/examples/WA_text.gif "Example WeakAura pack showing relative power")
 
