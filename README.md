@@ -1,6 +1,8 @@
 # FeralSnapshots - Alpha
 
-FeralSnapshots tracks the talents, buffs and damage modifiers applied for Rake, Rip, Thrash and Lunar Inspiration Moonfire. Snapshot damage modifiers are usable from WeakAuras, Plater and other addons.
+This World of Warcraft AddOn tracks the talents, buffs and damage modifiers applied for Rake, Rip, Thrash and Lunar Inspiration Moonfire. These damage modifiers are then displayed from WeakAuras, Plater and other addons.
+
+Feral Druid is the only class where damage over time abilities "snapshot". The buffs apply for the full duration of the debuff, even after they have expired. Deciding when to replace a weaker snapshot is what makes Feral so much fun to play.
 
 <div align="center">
 
@@ -18,8 +20,11 @@ FeralSnapshots tracks the talents, buffs and damage modifiers applied for Rake, 
 
 ### Example WeakAuras
 
-* Simple rake percentage text aura: [https://wago.io/Qy4t8or16](https://wago.io/Qy4t8or16)
 * Full pack of DoTs attached to the Personal Resource Display: [https://wago.io/MvvDUl_o9](https://wago.io/MvvDUl_o9)
+
+![ExamplePack](https://github.com/enthh/FeralSnapshots/raw/main/examples/WA_text.gif "Example WeakAura pack showing relative power")
+
+* Simple rake percentage text aura: [https://wago.io/Qy4t8or16](https://wago.io/Qy4t8or16)
 
 ## Usage
 
@@ -103,8 +108,6 @@ Spell IDs cast in Cat Form that snapshot:
 
 ## Usage - WeakAuras
 
-![ExamplePack](https://github.com/enthh/FeralSnapshots/raw/main/examples/WA_text.gif "Example WeakAura pack showing relative power")
-
 Add a Custom Status Trigger to your aura on events `UNIT_AURA:player:target PLAYER_TARGET_CHANGED` that exposes the relative damage percentage with dynamic stacks info:
 
 
@@ -116,3 +119,35 @@ Use conditions to.
 * Color the text <font color="red">red</font> when `Stacks < 100`
 
 ![ExampleConditions](https://github.com/enthh/FeralSnapshots/raw/main/examples/WA_conditions.png "Conditions setup")
+
+## Alternatives / Inspiration / Credits
+
+* MoonBunnie's Feral Bleed Power Weakaura for percentage text [https://wago.io/Syz8eBzY-](https://wago.io/Syz8eBzY-)
+* Xan's snapshot tracker for corner icons (Wago unknown)
+
+## FAQ
+
+### Where did this project come from?
+
+This project came from asking "What is the minimum information needed to be an amazing Feral Druid?".
+
+Deciding when to cast a bleed is the most dynamic aspect of Feral gameplay. I wanted to aid that decision in any addon, like WeakAuras, Plater or other AddOns, without custom scripts in one addon depending on scripts in another.
+
+### Why AddOn and not WeakAura?
+
+* A versioned addon eases upgrades across patches/expansions and spell changes (/wave Savage Roar).
+* A single addon compared to multiple WeakAuras ensures only one controller is active.
+* A free and open source addon allows the Feral community to rally around what makes Durid 4 Fite!
+
+### How is this different to MoonBunnie's weakaura?
+
+Similar:
+
+* Uses a global variable to access snapshots.
+* Used for text auras of relative power - popular in WeakAura HUDs.
+
+Different:
+
+* This exposes damage modifiers along with totals per buff for corner icon or border color type displays.
+* Minimum CPU usage/stutter by using OnEvent instead of OnUpdate (calculations every frame).
+* Uses namespaced functions instead of table lookups for a stable and extensible API.
