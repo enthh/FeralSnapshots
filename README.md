@@ -104,9 +104,11 @@ Find a unit's GUID with the function [`UnitGUID(unitId)`](https://wowpedia.fando
 
 ### Usage - WeakAuras
 
-Example showing colored text from relative power:
+<div style="float: right; padding-left: 2em;">
 
-![Example animation](https://github.com/enthh/FeralSnapshots/raw/main/Example_WA_text.gif Example)
+![Example](https://github.com/enthh/FeralSnapshots/raw/main/Example_WA_text.gif "Example WeakAura showing relative power")
+
+</div>
 
 Add a Custom Status Trigger to your aura on events: `UNIT_AURA:player:target PLAYER_TARGET_CHANGED`
 
@@ -114,7 +116,7 @@ Trigger with a target using the function.
 
 ```lua
 function()
-    return UnitGUID("target") ~= nil
+    return UnitExists("target")
 end
 ```
 
@@ -122,7 +124,7 @@ Untrigger without a target using the function.
 
 ```lua
 function()
-    return UnitGUID("target") == nil
+    return not UnitExists("target")
 end
 ```
 
