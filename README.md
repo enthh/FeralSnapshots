@@ -1,6 +1,6 @@
 # FeralSnapshots - Alpha
 
-FeralSnapshots tracks the talents, buffs and damage modifiers applied for Rake, Rip, Thrash and Lunar Inspiration Moonfire. Snapshot mamage modifiers are usable from WeakAuras, Plater and other addons.
+FeralSnapshots tracks the talents, buffs and damage modifiers applied for Rake, Rip, Thrash and Lunar Inspiration Moonfire. Snapshot damage modifiers are usable from WeakAuras, Plater and other addons.
 
 <div align="center">
 
