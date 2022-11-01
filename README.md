@@ -104,41 +104,16 @@ Find a unit's GUID with the function [`UnitGUID(unitId)`](https://wowpedia.fando
 
 ### Usage - WeakAuras
 
-<div style="float: right; padding-left: 2em;">
+![ExamplePack](https://github.com/enthh/FeralSnapshots/raw/main/examples/WA_text.gif "Example WeakAura pack showing relative power")
 
-![Example](https://github.com/enthh/FeralSnapshots/raw/main/Example_WA_text.gif "Example WeakAura showing relative power")
+Add a Custom Status Trigger to your aura on events `UNIT_AURA:player:target PLAYER_TARGET_CHANGED` that exposes the relative damage percentage with dynamic stacks info:
 
-</div>
 
-Add a Custom Status Trigger to your aura on events: `UNIT_AURA:player:target PLAYER_TARGET_CHANGED`
-
-Trigger with a target using the function.
-
-```lua
-function()
-    return UnitExists("target")
-end
-```
-
-Untrigger without a target using the function.
-
-```lua
-function()
-    return not UnitExists("target")
-end
-```
-
-Use [stack info](https.//github.com/WeakAuras/WeakAuras2/wiki/Dynamic-Information#stack-info) to display the power if Rake/Rip/Thrash/Moonfire was applied or refreshed:
-
-```lua
-function() 
-    return FeralSnapshots.RelativeRake(UnitGUID("target")).total * 100
-end
-```
-
-Display/format/round the power with the text variable. `%s`
+![ExampleTrigger](https://github.com/enthh/FeralSnapshots/raw/main/examples/WA_trigger.png "Trigger setup")
 
 Use conditions to.
 
 * Color the text <font color="green">green</font> when `Stacks > 100`
 * Color the text <font color="red">red</font> when `Stacks < 100`
+
+![ExampleConditions](https://github.com/enthh/FeralSnapshots/raw/main/examples/WA_conditions.png "Conditions setup")
