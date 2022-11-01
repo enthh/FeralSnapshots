@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+      - "!**-alpha**"
+      - "!**-beta**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Install and run Luacheck
+        uses: nebularg/actions-luacheck@v1
+        with:
+          args: "--no-color -q"
+          annotate: warning
+
+      - name: Create Package
+        uses: BigWigsMods/packager@v2
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
