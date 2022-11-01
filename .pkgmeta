@@ -1,5 +1,7 @@
 package-as: FeralSnapshots
 
 ignore:
+  - .luacheckrc
   - README.md
   - icon.jpg
+  - Example_WA_text.gif
