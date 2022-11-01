@@ -104,6 +104,10 @@ Find a unit's GUID with the function [`UnitGUID(unitId)`](https://wowpedia.fando
 
 ### Usage - WeakAuras
 
+Example showing colored text from relative power:
+
+![Example animation](https://github.com/enthh/FeralSnapshots/raw/main/Example_WA_text.gif Example)
+
 Add a Custom Status Trigger to your aura on events: `UNIT_AURA:player:target PLAYER_TARGET_CHANGED`
 
 Trigger with a target using the function.
