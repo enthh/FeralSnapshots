@@ -18,13 +18,17 @@ Feral Druid is the only class where damage over time abilities "snapshot". The b
 * Efficient. Updates from events rather than every frame, maximizing FPS
 * Provides a total and breakdown of damage modifier by buffs.
 
-### Example WeakAuras
+### Examples
 
-* Full pack of DoTs attached to the Personal Resource Display: [https://wago.io/MvvDUl_o9](https://wago.io/MvvDUl_o9)
+* Weakaura pack of DoTs attached to the Personal Resource Display: [https://wago.io/MvvDUl_o9](https://wago.io/MvvDUl_o9)
 
 ![ExamplePack](https://github.com/enthh/FeralSnapshots/raw/main/examples/WA_text.gif "Example WeakAura pack showing relative power")
 
-* Simple rake percentage text aura: [https://wago.io/Qy4t8or16](https://wago.io/Qy4t8or16)
+* Plater script coloring relative power as stacks: [https://wago.io/bfgPasy27](https://wago.io/bfgPasy27)
+
+![ExamplePlater](https://github.com/enthh/FeralSnapshots/raw/main/examples/Plater_screenshot.png "Example Plater script")
+
+* Weakaura text aura: [https://wago.io/Qy4t8or16](https://wago.io/Qy4t8or16)
 
 ## Usage
 
