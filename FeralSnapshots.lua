@@ -1,8 +1,17 @@
 local _, Private = ...
 
-local debuff = Private.debuff
+local MAJOR, MINOR = "FeralSnapshots", 1
 
-FeralSnapshots = {}
+if LibStub then
+    FeralSnapshots = LibStub:NewLibrary(MAJOR, MINOR)
+    if not FeralSnapshots then -- already loaded
+        return
+    end
+else
+    FeralSnapshots = {}
+end
+
+local debuff = Private.debuff
 
 function FeralSnapshots.Current(GUID, spellId)
     local unit = Private.snapshots[GUID]
