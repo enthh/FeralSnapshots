@@ -56,7 +56,7 @@ function Private:loadTraits()
                         for _, entryId in ipairs(node.entryIDs) do
                             local entry = C_Traits.GetEntryInfo(configId, entryId)
                             local definition = C_Traits.GetDefinitionInfo(entry.definitionID)
-                            if node.activeEntry then
+                            if node.activeEntry and definition.spellID then
                                 self.talents[definition.spellID] = node.currentRank
                             end
                         end
