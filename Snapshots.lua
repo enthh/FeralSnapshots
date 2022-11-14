@@ -13,6 +13,7 @@ local buff = { -- spellId by name
     incarnProwl = 102547,
     shadowmeld = 58984,
     suddenAmbush = 391974,
+    suddenAmbushConduit = 340698, -- SL content
     berserk = 106951,
     incarnation = 102543,
 
@@ -103,6 +104,7 @@ local function snapshot(spellId, has, aura, modifiers) -- snapshot state by spel
             or has(aura[buff.incarnProwl])
             or has(aura[buff.prowl])
             or has(aura[buff.shadowmeld])
+            or has(aura[buff.suddenAmbushConduit])
         then
             damage.stealth = modifiers.stealth
         end
