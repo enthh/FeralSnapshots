@@ -1,4 +1,4 @@
-## Interface: 100001
+## Interface: 100002
 ## Title: FeralSnapshots
 ## Notes: Feral Druid bleed and DoT snapshot tracking for applied, refreshable and new auras. Usable by WeakAuras, Plater and other addons.
 ## Author: Enth-Emerald Dream
