@@ -27,6 +27,13 @@ local debuff = { -- spellId by name
     moonfire = 155625,
 }
 
+local finisher = { -- spellId cast by name
+    rip = 1079,
+    maim = 22570,
+    primalWrath = 285381,
+    ferociousBite = 22568,
+}
+
 local talent = { -- passive spellId by name
     berserk = 106951,
     bloodtalons = 319439,
@@ -38,6 +45,8 @@ local talent = { -- passive spellId by name
 local buffId = tInvert(buff)
 
 local debuffId = tInvert(debuff)
+
+local finisherId = tInvert(finisher)
 
 Private.debuff = debuff
 
@@ -88,7 +97,14 @@ function Private:damageModifiers()
     }
 end
 
-local function snapshot(spellId, has, aura, modifiers) -- snapshot state by spell and damage modifier logic
+-- snapshot returns damage modifiers by ability, talents and current auras for
+-- this or next frame based on aura expirationTime
+local function snapshot(
+    spellId,  -- ID of snapshottable ability
+    has,      -- function to assert auras on this or next frame
+    aura,     -- table of current auras
+    modifiers -- talents or other modifiers
+)
     local damage = {
         tigersFury = ((has(aura[buff.tigersFury]) and modifiers.tigersFury) or 1),
         bloodtalons = 1,
@@ -220,6 +236,11 @@ function events:COMBAT_LOG_EVENT_UNFILTERED()
                 self:updateNextSnapshots()
             elseif debuffId[spellId] then
                 self:removeSnapshot(destGUID, spellId)
+            end
+        elseif msg == "SPELL_CAST_SUCCESS" then -- finisher + buff interactions
+            if finisherId[spellId] then
+                self:refreshBuff(buff.tigersFury) -- Raging Fury does not emit SPELL_AURA_REFRESH
+                self:updateNextSnapshots()
             end
         end
     end
