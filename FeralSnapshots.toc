@@ -3,6 +3,7 @@
 ## Notes: Feral Druid bleed and DoT snapshot tracking for applied, refreshable and new auras. Usable by WeakAuras, Plater and other addons.
 ## Author: Enth-Emerald Dream
 ## Version: @project-version@
+## IconTexture: Interface\AddOns\FeralSnapshots\Media\icon
 ## X-Website: https://www.curseforge.com/wow/addons/feralsnapshots
 ## X-Curse-Project-ID: 695549
 ## X-Wago-ID: 5bGoWnG0
