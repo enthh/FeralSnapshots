@@ -23,7 +23,7 @@ local buff = { -- spellId by name
 local debuff = { -- spellId by name
     rake = 155722,
     rip = 1079,
-    thrash = 106830,
+    thrash = 405233,
     moonfire = 155625,
 }
 
