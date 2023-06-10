@@ -105,7 +105,7 @@ Spell IDs cast in Cat Form that snapshot:
 {
     rake = 155722,     -- DoT portion
     rip = 1079,        -- DoT
-    thrash = 106830,   -- DoT portion
+    thrash = 405233,   -- DoT portion
     moonfire = 155625, -- lunar inspiration DoT portion
 }
 ```
