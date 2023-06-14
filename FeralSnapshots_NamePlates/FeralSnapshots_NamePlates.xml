@@ -1,5 +1,4 @@
-<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
-..\..\FrameXML\UI.xsd">
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://www.townlong-yak.com/framexml/latest/UI.xsd/get">
 	<Script file="FeralSnapshots_NamePlates.lua" />
 
 	<Frame name="FeralSnapshotsNamePlateDriverFrame" toplevel="true" mixin="FeralSnapshotsNamePlateDriverMixin">
