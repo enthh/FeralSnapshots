@@ -5,3 +5,6 @@ ignore:
   - README.md
   - icon.jpg
   - examples/*
+
+  move-folders:
+    FeralSnapshots/FeralSnapshots_NamePlates: FeralSnapshots_NamePlates
