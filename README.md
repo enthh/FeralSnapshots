@@ -1,4 +1,4 @@
-# FeralSnapshots - Alpha
+# FeralSnapshots
 
 This World of Warcraft AddOn tracks the talents, buffs and damage modifiers applied for Rake, Rip, Thrash and Lunar Inspiration Moonfire. These damage modifiers are then displayed from WeakAuras, Plater and other addons.
 
@@ -18,7 +18,39 @@ Feral Druid is the only class where damage over time abilities "snapshot". The b
 * Efficient. Updates from events rather than every frame, maximizing FPS
 * Provides a total and breakdown of damage modifier by buffs.
 
-### Examples
+# Feral Snapshot Name Plate Indicators
+
+Enabling the FeralSnapshots NamePlates addon, snapshot strength will show on Blizzard NamePlates.
+
+![NamePlate Example](examples/NamePlate.png)
+
+Each bleed that can snapshot shows indicators on the current and next snapshots based on the player's current buffs. Use this to decide to overwrite a bleed with a stronger or weaker version.
+
+## Indicators
+
+The shape and color of the indicator compares the current snapshot to what would be applied if the bleed is overwritten.
+
+| Indicator | Has Snapshot | Would apply snapshot| Power| Action |
+|-----------|--------------|----------------------|------|-------|
+| ![None](examples/Rake_None.png)  | | | Equal | Gain snapshotting buff (Tiger's Fury, Shadowmeld, Bloodtalons) |
+| ![Yellow](examples/Rake_TF_TF.png) | X | X | Equal (buffed) | Reapply in pandemic window |
+| ![Green reversed](examples/Rake_None_TF.png) | | X | Gain | Reapply soon | 
+| ![Red](examples/Rake_TF_None.png) | X | | Loss | Gain snapshotting buff or wait for expiration |
+
+The lower indicator is for Tiger's Fury snapshots which applies to all Rake, Rip, Thrash and Moonfire with Lunar Inspiration.
+
+## Upper Indicators
+
+The upper indicator is for bleed specific snapshots like Stealth, Bloodtalons and Clear Casting with Moment of Clarity.
+
+| Indicator | Buffs | Strength |
+|-----------|-------|----------|
+| ![Rake Stealth](examples/Rake_Stealth_Stealth.png) | Prowl, Sudden Ambush (Talented), Shadowmeld (Racial)| 160% |
+| ![Rip Bloodtalons](examples/Rip_BT_BT.png) | Bloodtalons (Talented) | 125% |
+| ![Thrash Clear Casting](examples/Thrash_MoC_MoC.png) | Clear Casting (Moment of Clarity) | 115% |
+
+
+# Other Examples
 
 * Weakaura pack of DoTs attached to the Personal Resource Display: [https://wago.io/MvvDUl_o9](https://wago.io/MvvDUl_o9)
 

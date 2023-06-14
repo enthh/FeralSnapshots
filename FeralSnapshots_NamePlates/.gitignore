@@ -1,5 +1,0 @@
-.env
-.release/**
-.vscode/**
-CHANGELOG.md
-release.sh

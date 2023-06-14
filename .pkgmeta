@@ -6,5 +6,5 @@ ignore:
   - icon.jpg
   - examples/*
 
-  move-folders:
-    FeralSnapshots/FeralSnapshots_NamePlates: FeralSnapshots_NamePlates
+move-folders:
+  FeralSnapshots/FeralSnapshots_NamePlates: FeralSnapshots_NamePlates
