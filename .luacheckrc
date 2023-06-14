@@ -33,6 +33,14 @@ globals = {
 
 	-- Exported table
 	"FeralSnapshots",
+	"FeralSnapshotsNamePlate",
+	"FeralSnapshotsNamePlateDriverMixin",
+	"FeralSnapshotsAuraMixin",
+	"FeralSnapshotsIndicatorMixin",
+
+	-- misc FrameXML
+	"CreateFramePool",
+	"CreateAndInitFromMixin",
 
 	-- misc custom
 	"AceGUIWeakAurasMultiLineEditBoxInsertLink",
