@@ -41,6 +41,7 @@ globals = {
 	-- misc FrameXML
 	"CreateFramePool",
 	"CreateAndInitFromMixin",
+	"CreateColor",
 
 	-- misc custom
 	"AceGUIWeakAurasMultiLineEditBoxInsertLink",

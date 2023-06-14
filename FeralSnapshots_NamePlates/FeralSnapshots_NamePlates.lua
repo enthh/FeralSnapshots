@@ -48,10 +48,8 @@ function FeralSnapshotsNamePlateDriverMixin:OnUnitAuraUpdate(unit)
     if UnitIsUnit("player", unit) then
         -- player buffs could change snapshot powers
         updates = C_NamePlate.GetNamePlates(false)
-        DevTool:AddData(updates, "player")
     else
         updates = { C_NamePlate.GetNamePlateForUnit(unit) }
-        DevTool:AddData(updates, "unit")
     end
 
     for _, namePlate in ipairs(updates) do
