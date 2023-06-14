@@ -1,0 +1,39 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+	<Script file="FeralSnapshots_NamePlates.lua" />
+
+	<Frame name="FeralSnapshotsNamePlateDriverFrame" toplevel="true" mixin="FeralSnapshotsNamePlateDriverMixin">
+		<Scripts>
+			<OnLoad method="OnLoad" />
+			<OnEvent method="OnEvent" />
+		</Scripts>
+	</Frame>
+
+	<Frame name="FeralSnapshotsAuraTemplate" virtual="true" hidden="false" mixin="FeralSnapshotsAuraMixin">
+		<Size x="20" y="20"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture parentKey="bloodtalons" atlas="common-icon-forwardarrow" hidden="true" mixin="FeralSnapshotsIndicatorMixin">
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="momentOfClarity" atlas="common-icon-forwardarrow" hidden="true" mixin="FeralSnapshotsIndicatorMixin">
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="stealth" atlas="common-icon-forwardarrow" hidden="true" mixin="FeralSnapshotsIndicatorMixin">
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="tigersFury" atlas="common-icon-forwardarrow" hidden="true" mixin="FeralSnapshotsIndicatorMixin">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+	</Frame>
+</Ui>
