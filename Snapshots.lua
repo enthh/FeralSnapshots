@@ -115,8 +115,6 @@ local function snapshot(
 
     if debuff.rake == spellId then
         if has(aura[buff.suddenAmbush])
-            or has(aura[buff.berserk])
-            or has(aura[buff.incarnation])
             or has(aura[buff.incarnProwl])
             or has(aura[buff.prowl])
             or has(aura[buff.shadowmeld])
