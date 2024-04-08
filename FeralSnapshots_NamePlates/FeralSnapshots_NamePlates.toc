@@ -1,4 +1,4 @@
-## Interface: 100100
+## Interface: 100206
 ## Title: FeralSnapshots NamePlates
 ## Notes: Snapshot indicators on Blizzard Nameplates. Shows small icons for snapshots applied and the power difference on next application.
 ## Author: Enth-Emerald Dream
