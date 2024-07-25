@@ -63,13 +63,11 @@ function Private:loadTraits()
                 local nodeIds = C_Traits.GetTreeNodes(treeId)
                 for _, nodeId in ipairs(nodeIds) do
                     local node = C_Traits.GetNodeInfo(configId, nodeId)
-                    if node and node.ID ~= 0 then
-                        for _, entryId in ipairs(node.entryIDs) do
-                            local entry = C_Traits.GetEntryInfo(configId, entryId)
-                            local definition = C_Traits.GetDefinitionInfo(entry.definitionID)
-                            if node.activeEntry and definition.spellID then
-                                self.talents[definition.spellID] = node.currentRank
-                            end
+                    if node and node.activeEntry then
+                        local entry = C_Traits.GetEntryInfo(configId, node.activeEntry.entryID)
+                        local definition = C_Traits.GetDefinitionInfo(entry.definitionID)
+                        if definition.spellID then
+                            self.talents[definition.spellID] = node.activeEntry.rank
                         end
                     end
                 end
