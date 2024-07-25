@@ -40,6 +40,7 @@ local talent = { -- passive spellId by name
     incarnation = 102543,
     momentOfClarity = 236068,
     carnivorousInstinct = 390902,
+    tigersTenacity = 391872,
 }
 
 local buffId = tInvert(buff)
@@ -62,13 +63,11 @@ function Private:loadTraits()
                 local nodeIds = C_Traits.GetTreeNodes(treeId)
                 for _, nodeId in ipairs(nodeIds) do
                     local node = C_Traits.GetNodeInfo(configId, nodeId)
-                    if node and node.ID ~= 0 then
-                        for _, entryId in ipairs(node.entryIDs) do
-                            local entry = C_Traits.GetEntryInfo(configId, entryId)
-                            local definition = C_Traits.GetDefinitionInfo(entry.definitionID)
-                            if node.activeEntry and definition.spellID then
-                                self.talents[definition.spellID] = node.currentRank
-                            end
+                    if node and node.activeEntry then
+                        local entry = C_Traits.GetEntryInfo(configId, node.activeEntry.entryID)
+                        local definition = C_Traits.GetDefinitionInfo(entry.definitionID)
+                        if definition.spellID then
+                            self.talents[definition.spellID] = node.activeEntry.rank
                         end
                     end
                 end
@@ -90,9 +89,11 @@ end
 
 function Private:damageModifiers()
     return {
-        tigersFury      = 1.15 + (self:rank(talent.carnivorousInstinct) * 0.06),
-        bloodtalons     = self:rank(talent.bloodtalons) > 0 and 1.25 or 1,
-        momentOfClarity = self:rank(talent.momentOfClarity) > 0 and 1.15 or 1,
+        tigersFury      = 1.15 +
+            (self:rank(talent.carnivorousInstinct) * 0.06) +
+            (self:rank(talent.tigersTenacity) * 0.10),
+        bloodtalons     = 1 + (self:rank(talent.bloodtalons) * 0.25),
+        momentOfClarity = 1 + (self:rank(talent.momentOfClarity) * 0.15),
         stealth         = 1.60,
     }
 end
@@ -106,7 +107,7 @@ local function snapshot(
     modifiers -- talents or other modifiers
 )
     local damage = {
-        tigersFury = ((has(aura[buff.tigersFury]) and modifiers.tigersFury) or 1),
+        tigersFury = 1,
         bloodtalons = 1,
         momentOfClarity = 1,
         stealth = 1,
@@ -114,6 +115,9 @@ local function snapshot(
     }
 
     if debuff.rake == spellId then
+        if has(aura[buff.tigersFury]) then
+            damage.tigersFury = modifiers.tigersFury
+        end
         if has(aura[buff.suddenAmbush])
             or has(aura[buff.incarnProwl])
             or has(aura[buff.prowl])
@@ -125,18 +129,27 @@ local function snapshot(
         damage.total = damage.tigersFury * damage.stealth
 
     elseif debuff.rip == spellId then
+        if has(aura[buff.tigersFury]) then
+            damage.tigersFury = modifiers.tigersFury
+        end
         if has(aura[buff.bloodtalons]) then
             damage.bloodtalons = modifiers.bloodtalons
         end
         damage.total = damage.tigersFury * damage.bloodtalons
 
     elseif debuff.thrash == spellId then
+        if has(aura[buff.tigersFury]) then
+            damage.tigersFury = modifiers.tigersFury
+        end
         if has(aura[buff.clearcasting]) then
             damage.momentOfClarity = modifiers.momentOfClarity
         end
         damage.total = damage.tigersFury * damage.momentOfClarity
 
     elseif debuff.moonfire == spellId then
+        if has(aura[buff.tigersFury]) then
+            damage.tigersFury = modifiers.tigersFury
+        end
         damage.total = damage.tigersFury
 
     else
@@ -162,7 +175,7 @@ function Private:load()
     self.snapshots = self.snapshots or {}
 
     self:loadTraits()
-    self.damage = self:damageModifiers()
+    self.modifiers = self:damageModifiers()
 
     self.buffs = {}
     for _, spellId in pairs(buff) do
@@ -175,7 +188,7 @@ end
 
 function Private:updateNextSnapshots()
     for _, spellId in pairs(debuff) do
-        self.next[spellId] = snapshot(spellId, activeNextFrame, self.buffs, self.damage)
+        self.next[spellId] = snapshot(spellId, activeNextFrame, self.buffs, self.modifiers)
     end
 end
 
@@ -206,7 +219,7 @@ function Private:refreshSnapshot(destGUID, spellId)
         unit = {}
         self.snapshots[destGUID] = unit
     end
-    unit[spellId] = snapshot(spellId, activeThisFrame, self.buffs, self.damage)
+    unit[spellId] = snapshot(spellId, activeThisFrame, self.buffs, self.modifiers)
 end
 
 --
