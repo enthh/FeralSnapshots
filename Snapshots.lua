@@ -1,8 +1,8 @@
 local _, Private = ...
 
 local -- from global
-GetTime, UnitGUID, CombatLogGetCurrentEventInfo, C_UnitAuras, C_ClassTalents, C_Traits =
-GetTime, UnitGUID, CombatLogGetCurrentEventInfo, C_UnitAuras, C_ClassTalents, C_Traits
+GetTime, UnitGUID, CombatLogGetCurrentEventInfo, C_UnitAuras, C_ClassTalents, C_Traits, C_Spell =
+GetTime, UnitGUID, CombatLogGetCurrentEventInfo, C_UnitAuras, C_ClassTalents, C_Traits, C_Spell
 
 local buff = { -- spellId by name
     tigersFury = 5217,
