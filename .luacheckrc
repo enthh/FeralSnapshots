@@ -78,6 +78,7 @@ globals = {
 	"Plater",
 
 	-- FrameXML misc
+	"C_Spell",
 	"BackdropTemplateMixin",
 	"C_Timer",
 	"ChatFrame_AddMessageEventFilter",
