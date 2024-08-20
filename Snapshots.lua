@@ -77,7 +77,7 @@ function Private:loadTraits()
 
     -- conduits don't stack
     local carnivourousInstinct = 340705 -- usable in SL
-    if IsPlayerSpell(carnivourousInstinct) and IsUsableSpell(carnivourousInstinct) then
+    if IsPlayerSpell(carnivourousInstinct) and C_Spell.IsSpellUsable(carnivourousInstinct) then
         local talentedRank = self.talents[talent.carnivorousInstinct] or 0
         self.talents[talent.carnivorousInstinct] = max(1, talentedRank)
     end
