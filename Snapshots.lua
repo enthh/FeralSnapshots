@@ -65,9 +65,11 @@ function Private:loadTraits()
                     local node = C_Traits.GetNodeInfo(configId, nodeId)
                     if node and node.activeEntry then
                         local entry = C_Traits.GetEntryInfo(configId, node.activeEntry.entryID)
-                        local definition = C_Traits.GetDefinitionInfo(entry.definitionID)
-                        if definition.spellID then
-                            self.talents[definition.spellID] = node.activeEntry.rank
+                        if entry and entry.definitionID then
+                            local definition = C_Traits.GetDefinitionInfo(entry.definitionID)
+                            if definition.spellID then
+                                self.talents[definition.spellID] = node.activeEntry.rank
+                            end
                         end
                     end
                 end
